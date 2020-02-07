@@ -1,0 +1,25 @@
+#!/bin/bash
+# MQTT publisher
+
+# Requires mosquitto_pub installed to the system. 
+# Copy this file to omd share/checkmk/notifications and set chmod a+rx.
+# Change these according to your checkmk install settings:
+
+CHECKMK_URL="https://yourhost"
+CHECKMK_SITE="yoursite"
+
+SERVICE=$(echo "$NOTIFY_SERVICEDESC" | sed 's/ /_/g')
+SERVICE_ENC=$(echo "$NOTIFY_SERVICEDESC" | sed 's/ /%20/g')
+SERVICE_URL="https://${CHECKMK_URL}/${CHECKMK_SITE}/check_mk/index.py?start_url=%2F${CHECKMK_SITE}%2Fcheck_mk%2Fview.py%3Fhost%3D${NOTIFY_HOSTNAME}%26service%3D${SERVICE_ENC}%26site%3D${CHECKMK_SITE}%26view_name%3Dservice"
+
+MESSAGE="\
+{\"host\": \"$NOTIFY_HOSTNAME\",\
+\"what\": \"$NOTIFY_WHAT\",\
+\"datetime\": \"$NOTIFY_SHORTDATETIME\",\
+\"type\": \"$NOTIFY_NOTIFICATIONTYPE\",\
+\"servicedesc\": \"$NOTIFY_SERVICEDESC\",\
+\"servicestate\": \"$NOTIFY_SERVICESTATE\",\
+\"serviceoutput\": \"$NOTIFY_SERVICEOUTPUT\",\
+\"serviceurl\": \"$SERVICE_URL\" }"
+
+/usr/bin/mosquitto_pub -t "alerts/checkmk/$NOTIFY_HOSTNAME/$SERVICE/$NOTIFY_SERVICESTATE" -h "$NOTIFY_PARAMETER_1" -u "$NOTIFY_PARAMETER_3" -P "$NOTIFY_PARAMETER_4" -m "$MESSAGE" -i cmknotify -p "$NOTIFY_PARAMETER_2"
