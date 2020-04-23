@@ -1,0 +1,20 @@
+#!/bin/bash
+
+telegram_bot_token="$NOTIFY_PARAMETER_1"
+telegram_chat_id="$NOTIFY_PARAMETER_2"
+
+if [ "$NOTIFY_WHAT" == "SERVICE" ]; then
+datatext="<b>$NOTIFY_NOTIFICATIONTYPE</b>\
+%0A$NOTIFY_HOSTNAME $NOTIFY_SERVICEDESC is <b>$NOTIFY_SERVICESTATE</b> \
+(was <i>$NOTIFY_LASTSERVICESTATE</i>). \
+%0A$NOTIFY_SERVICEOUTPUT"
+else
+datatext="<b>$NOTIFY_NOTIFICATIONTYPE</b>\
+%0A$NOTIFY_HOSTNAME is <b>$NOTIFY_HOSTSTATE</b> (was <i>$NOTIFY_LASTHOSTSTATE</i>)."
+fi
+
+curl \
+ --data parse_mode=HTML \
+ --data chat_id=$telegram_chat_id \
+ --data text="$datatext" \
+ --request POST https://api.telegram.org/bot$telegram_bot_token/sendMessage
