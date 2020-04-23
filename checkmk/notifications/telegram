@@ -1,4 +1,5 @@
 #!/bin/bash
+# Telegram notifier
 
 telegram_bot_token="$NOTIFY_PARAMETER_1"
 telegram_chat_id="$NOTIFY_PARAMETER_2"

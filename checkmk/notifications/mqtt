@@ -3,6 +3,10 @@
 
 # Requires mosquitto_pub installed to the system. 
 # Copy this file to omd share/checkmk/notifications and set chmod a+rx.
+# NOTIFY_PARAMETER_1 = mqtt broker hostname
+# NOTIFY_PARAMETER_2 = mqtt broker username
+# NOTIFY_PARAMETER_3 = mqtt broker password
+# NOTIFY_PARAMETER_4 = mqtt broker port
 # Change these according to your checkmk install settings:
 
 CHECKMK_URL="https://yourhost"
