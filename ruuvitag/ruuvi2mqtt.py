@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import logging
 import paho.mqtt.client as mqtt
 import json
 from ruuvitag_sensor.ruuvi import RuuviTagSensor
+
+logging.basicConfig(level=logging.DEBUG)
 
 client=mqtt.Client("Ruuvireader")
 client.connect("localhost")
