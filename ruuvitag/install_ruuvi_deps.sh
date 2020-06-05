@@ -5,7 +5,7 @@
 sudo apt update
 sudo apt upgrade
 
-sudo apt install -y git mosquitto mosquitto-clients python3-pip
+sudo apt install -y git mosquitto mosquitto-clients python3-pip bluez-hcidump bluetooth bluez blueman
 sudo apt install -y libbz2-dev liblzma-dev libsqlite3-dev libncurses5-dev libgdbm-dev zlib1g-dev libreadline-dev libssl-dev tk-dev
 
 sudo pip3 install --upgrade setuptools
