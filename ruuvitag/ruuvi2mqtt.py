@@ -7,9 +7,13 @@ import struct
 import time
 import paho.mqtt.client as mqtt
 import json
+import os
 from ruuvitag_sensor.ruuvi import RuuviTagSensor
 
-logging.basicConfig(level=logging.WARNING)
+logging.basicConfig(
+    format='%(asctime)s %(levelname)-8s %(message)s',
+    level=logging.WARNING,
+    datefmt='%Y-%m-%d %H:%M:%S')
 
 client=mqtt.Client("Ruuvireader")
 client.connect("localhost")
