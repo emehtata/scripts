@@ -7,12 +7,13 @@ import struct
 import time
 import paho.mqtt.client as mqtt
 import json
+import sys
 import os
 from ruuvitag_sensor.ruuvi import RuuviTagSensor
 
 logging.basicConfig(
     format='%(asctime)s %(levelname)-8s %(message)s',
-    level=logging.WARNING,
+    level=logging.ERROR,
     datefmt='%Y-%m-%d %H:%M:%S')
 
 client=mqtt.Client("Ruuvireader")
@@ -22,9 +23,9 @@ ruuvis = {
   "DD:17:F3:D7:86:CE": "fridge",
   "EA:D5:76:69:70:99": "freezer",
   "EC:67:46:36:EA:60": "sauna",
-  "D5:43:48:93:FE:F0": "cage",
+  "FE:87:0F:93:69:AA": "biergarten",
   "E8:28:93:CE:5A:E8": "greenhouse",
-  "FE:87:0F:93:69:AA": "biergarten"
+  "D5:43:48:93:FE:F0": "pool"
   }
 
 r = redis.Redis(host='localhost', port=6379, db=0)
@@ -59,11 +60,11 @@ def handle_data(found_data):
   set_redis_last(room, time.time())
   for tag in ruuvis:
     lastseen = time.time()-get_redis_last(ruuvis[tag])
-    if lastseen > 60:
-      logging.warning("Not receiving data from %s" % tag)
-      logging.error("Restarting")
-      os.execv(sys.argv[0], sys.argv)
+    if lastseen > 180:
+      logging.error("Restarting (No data received from %s)" % ruuvis[tag])
+      #os.execv(sys.argv[0], sys.argv)
+      #os.kill(os.getpid(), 9)
     else:
-      logging.debug("%s last seen %f seconds ago" % ( tag, lastseen ) )
+      logging.debug("%s last seen %f seconds ago" % ( ruuvis[tag], lastseen ) )
 
 RuuviTagSensor.get_datas(handle_data)
