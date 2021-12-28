@@ -36,7 +36,7 @@ for tag in ruuvis:
 def set_redis_last(key, lastseen):
   try:
     r.set(key+'.seen', lastseen)
-    logging.debug("key: "+key+", seen: "+str(lastseen))
+    logging.info("key: "+key+", seen: "+str(lastseen))
   except:
     logging.error("Can not set redis value")
 
@@ -47,6 +47,14 @@ def get_redis_last(key):
     return retval
   else:
     return time.time()
+
+def send_temperature(jdata):
+  topic=jdata["room"]+"/temperature"
+  client.publish(topic, jdata["temperature"])
+
+def send_humidity(jdata):
+  topic=jdata["room"]+"/humidity"
+  client.publish(topic, jdata["humidity"])
 
 def handle_data(found_data):
   room=ruuvis[found_data[0]]
@@ -66,5 +74,7 @@ def handle_data(found_data):
       #os.kill(os.getpid(), 9)
     else:
       logging.debug("%s last seen %f seconds ago" % ( ruuvis[tag], lastseen ) )
+  send_temperature(jdata)
+  send_humidity(jdata)
 
 RuuviTagSensor.get_datas(handle_data)
