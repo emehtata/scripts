@@ -56,6 +56,10 @@ def send_humidity(jdata):
   topic=jdata["room"]+"/humidity"
   client.publish(topic, jdata["humidity"])
 
+def send_pressure(jdata):
+  topic=jdata["room"]+"/pressure"
+  client.publish(topic, jdata["pressure"])
+
 def handle_data(found_data):
   room=ruuvis[found_data[0]]
   topic="home/"+room
@@ -76,5 +80,6 @@ def handle_data(found_data):
       logging.debug("%s last seen %f seconds ago" % ( ruuvis[tag], lastseen ) )
   send_temperature(jdata)
   send_humidity(jdata)
+  send_pressure(jdata)
 
 RuuviTagSensor.get_datas(handle_data)
