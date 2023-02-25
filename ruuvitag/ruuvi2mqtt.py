@@ -26,24 +26,15 @@ ruuvis = {
   "EC:67:46:36:EA:60": "sauna",
   "FE:87:0F:93:69:AA": "biergarten",
   "E8:28:93:CE:5A:E8": "greenhouse",
-  "D5:43:48:93:FE:F0": "fridge"
+  "D5:43:48:93:FE:F0": "fridge",
+  "C5:7D:4C:65:9D:60": "car-interior",
+  "E2:9D:53:95:0E:8B": "upstairs-small-bedroom",
+  "D1:48:D2:7D:3D:02": "downstairs-bedroom"
   }
 
 def send_single(jdata, keyname):
   topic=jdata['room']+f"/{keyname}"
   client.publish(topic, jdata[keyname])
-
-def send_temperature(jdata):
-  topic=jdata["room"]+"/temperature"
-  client.publish(topic, jdata["temperature"])
-
-def send_humidity(jdata):
-  topic=jdata["room"]+"/humidity"
-  client.publish(topic, jdata["humidity"])
-
-def send_pressure(jdata):
-  topic=jdata["room"]+"/pressure"
-  client.publish(topic, jdata["pressure"])
 
 def handle_data(found_data):
   room=ruuvis[found_data[0]]
