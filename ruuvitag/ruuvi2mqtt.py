@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import logging
-import redis
 import struct
 import time
 import paho.mqtt.client as mqtt
@@ -30,32 +29,9 @@ ruuvis = {
   "D5:43:48:93:FE:F0": "fridge"
   }
 
-r = redis.Redis(host='localhost', port=6379, db=0)
-
-lastseen={}
-last_in_redis={}
-
-for tag in ruuvis:
-  r.set(ruuvis[tag]+'.seen', time.time())
-  lastseen[ruuvis[tag]]=time.time()
-  last_in_redis[ruuvis[tag]]=0
-
-logging.info(f"{lastseen}")
-
-def set_redis_last(key, lastseen):
-  try:
-    r.set(key+'.seen', lastseen)
-    logging.info("Writing key: "+key+", seen: "+str(lastseen))
-  except:
-    logging.error("Can not set redis value")
-
-def get_redis_last(key):
-  retval=float(r.get(key+'.seen'))
-  logging.debug("%s %f" % (key, retval))
-  if retval:
-    return retval
-  else:
-    return time.time()
+def send_single(jdata, keyname):
+  topic=jdata['room']+f"/{keyname}"
+  client.publish(topic, jdata[keyname])
 
 def send_temperature(jdata):
   topic=jdata["room"]+"/temperature"
@@ -76,26 +52,11 @@ def handle_data(found_data):
   jdata=found_data[1]
   jdata.update( { "room": room } )
   my_data=json.dumps(jdata).replace("'", '"')
-  logging.debug(my_data)
+  logging.info(my_data)
   client.publish(topic, my_data)
-  lastseen[room]=time.time()
-  if time.time()-last_in_redis[room] > MAX_IDLE/2:
-    logging.info("="*40)
-    last_in_redis[room]=time.time()
-    set_redis_last(room, time.time())
-    logging.info("="*40)
-  for tag in ruuvis:
-    if time.time()-lastseen[ruuvis[tag]] > MAX_IDLE:
-        lastseen[tag] = get_redis_last(ruuvis[tag])
-
-    if time.time()-lastseen[ruuvis[tag]] > MAX_IDLE:
-      logging.error("No data received from %s for over %d seconds (%.02f)" % ( ruuvis[tag], MAX_IDLE, time.time()-lastseen[ruuvis[tag]] ))
-      #os.execv(sys.argv[0], sys.argv)
-      #os.kill(os.getpid(), 9)
-    else:
-      logging.info("%s - last seen %f seconds ago" % ( ruuvis[tag], time.time()-lastseen[ruuvis[tag]] ) )
-  send_temperature(jdata)
-  send_humidity(jdata)
-  send_pressure(jdata)
+  for j in jdata:
+    send_single(jdata, j)
   logging.info("-"*40)
-RuuviTagSensor.get_datas(handle_data)
+
+if __name__ == '__main__':
+  RuuviTagSensor.get_datas(handle_data)
