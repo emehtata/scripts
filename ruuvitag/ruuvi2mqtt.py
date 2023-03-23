@@ -17,8 +17,10 @@ logging.basicConfig(
     level=logging.ERROR,
     datefmt='%Y-%m-%d %H:%M:%S')
 
-client=mqtt.Client("Ruuvireader")
-client.connect("localhost")
+broker_address="192.168.7.8"
+broker_port=11883
+
+client=mqtt.Client("mrpi3-ruuviclient")
 
 ruuvis = {
   "DD:17:F3:D7:86:CE": "pool",
@@ -49,5 +51,27 @@ def handle_data(found_data):
     send_single(jdata, j)
   logging.info("-"*40)
 
+def on_connect(client, userdata, flags, rc):
+    if rc==0:
+        logging.info(f"Connected OK Returned code {rc}")
+    else:
+        logging.error(f"Bad connection Returned code {rc}")
+
+def on_disconnect(client, userdata, rc):
+    if rc != 0:
+        logging.error("Unexpected MQTT disconnection. Will reconnect.")
+        client.disconnect()
+        time.sleep(10)
+        client.connect(broker_address, port=broker_port)
+        logging.info("Connected.")
+
 if __name__ == '__main__':
-  RuuviTagSensor.get_datas(handle_data)
+  client.on_connect = on_connect
+  client.on_disconnect = on_disconnect
+  client.connect(broker_address, port=broker_port)
+  try:
+    RuuviTagSensor.get_data(handle_data)
+  except Exception as e:
+    logging.warning(f"get_data not working, trying get_datas: {e}")
+    RuuviTagSensor.get_datas(handle_data)
+
