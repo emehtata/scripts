@@ -14,13 +14,16 @@ MAX_IDLE=300
 
 logging.basicConfig(
     format='%(asctime)s %(levelname)-8s %(message)s',
-    level=logging.ERROR,
+    level=logging.INFO,
     datefmt='%Y-%m-%d %H:%M:%S')
 
-broker_address="192.168.7.8"
-broker_port=11883
+client = {}
 
-client=mqtt.Client("mrpi3-ruuviclient")
+brokers = {
+    "192.168.7.8":  { "port": 1883 },
+    "192.168.7.79": { "port": 1883 }
+}
+
 
 ruuvis = {
   "DD:17:F3:D7:86:CE": "pool",
@@ -34,11 +37,13 @@ ruuvis = {
   "D1:48:D2:7D:3D:02": "downstairs-bedroom"
   }
 
-def send_single(jdata, keyname):
+def send_single(jdata, keyname, client):
   topic=jdata['room']+f"/{keyname}"
+  logging.info(f"{topic}: {jdata[keyname]}")
   client.publish(topic, jdata[keyname])
 
 def handle_data(found_data):
+  logging.info(found_data)
   room=ruuvis[found_data[0]]
   topic="home/"+room
   logging.debug(room)
@@ -46,12 +51,14 @@ def handle_data(found_data):
   jdata.update( { "room": room } )
   my_data=json.dumps(jdata).replace("'", '"')
   logging.info(my_data)
-  client.publish(topic, my_data)
-  for j in jdata:
-    send_single(jdata, j)
+  for b in brokers:
+    client[b].publish(topic, my_data)
+    for j in jdata:
+      send_single(jdata, j, client[b])
   logging.info("-"*40)
 
 def on_connect(client, userdata, flags, rc):
+    logging.info(f"Connected, returned code {rc}")
     if rc==0:
         logging.info(f"Connected OK Returned code {rc}")
     else:
@@ -66,9 +73,13 @@ def on_disconnect(client, userdata, rc):
         logging.info("Connected.")
 
 if __name__ == '__main__':
-  client.on_connect = on_connect
-  client.on_disconnect = on_disconnect
-  client.connect(broker_address, port=broker_port)
+  for b in brokers:
+    logging.info(f"Connecting Broker: {b} {brokers[b]}")
+    client[b]=mqtt.Client(f"mrpi3-ruuviclient")
+    client[b].on_connect = on_connect
+    client[b].on_disconnect = on_disconnect
+    client[b].connect(b, brokers[b]['port'])
+    logging.info(f"Connection OK {client[b]}  {brokers[b]}")
   try:
     RuuviTagSensor.get_data(handle_data)
   except Exception as e:
