@@ -13,7 +13,7 @@ from ruuvitag_sensor.ruuvi import RuuviTagSensor
 
 logging.basicConfig(
     format='%(asctime)s %(levelname)-8s %(message)s',
-    level=logging.INFO,
+    level=logging.ERROR,
     datefmt='%Y-%m-%d %H:%M:%S')
 
 client = {}
@@ -66,10 +66,10 @@ def on_connect(client, userdata, flags, rc):
 def on_disconnect(client, userdata, rc):
     if rc != 0:
         logging.error("Unexpected MQTT disconnection. Will reconnect.")
-        # client.disconnect()
-        # time.sleep(10)
-        # client.connect(broker_address, port=broker_port)
-        # logging.info("Connected.")
+        client.disconnect()
+        time.sleep(10)
+        client.connect(broker_address, port=broker_port)
+        logging.info("Connected.")
 
 if __name__ == '__main__':
   for b in brokers:
