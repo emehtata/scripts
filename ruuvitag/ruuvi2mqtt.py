@@ -8,9 +8,8 @@ import paho.mqtt.client as mqtt
 import json
 import sys
 import os
+import platform
 from ruuvitag_sensor.ruuvi import RuuviTagSensor
-
-MAX_IDLE=300
 
 logging.basicConfig(
     format='%(asctime)s %(levelname)-8s %(message)s',
@@ -67,15 +66,15 @@ def on_connect(client, userdata, flags, rc):
 def on_disconnect(client, userdata, rc):
     if rc != 0:
         logging.error("Unexpected MQTT disconnection. Will reconnect.")
-        client.disconnect()
-        time.sleep(10)
-        client.connect(broker_address, port=broker_port)
-        logging.info("Connected.")
+        # client.disconnect()
+        # time.sleep(10)
+        # client.connect(broker_address, port=broker_port)
+        # logging.info("Connected.")
 
 if __name__ == '__main__':
   for b in brokers:
     logging.info(f"Connecting Broker: {b} {brokers[b]}")
-    client[b]=mqtt.Client(f"mrpi3-ruuviclient")
+    client[b]=mqtt.Client(f"{platform.node()}-ruuviclient")
     client[b].on_connect = on_connect
     client[b].on_disconnect = on_disconnect
     client[b].connect(b, brokers[b]['port'])
