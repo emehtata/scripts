@@ -13,7 +13,7 @@ from ruuvitag_sensor.ruuvi import RuuviTagSensor
 
 logging.basicConfig(
     format='%(asctime)s %(levelname)-8s %(message)s',
-    level=logging.ERROR,
+    level=logging.WARNING,
     datefmt='%Y-%m-%d %H:%M:%S')
 
 client = {}
@@ -22,7 +22,6 @@ brokers = {
     "192.168.7.8":  { "port": 1883 },
     "192.168.7.79": { "port": 1883 }
 }
-
 
 ruuvis = {
   "DD:17:F3:D7:86:CE": "pool",
@@ -48,6 +47,7 @@ def handle_data(found_data):
   logging.debug(room)
   jdata=found_data[1]
   jdata.update( { "room": room } )
+  jdata.update( { "client": myhostname } )
   my_data=json.dumps(jdata).replace("'", '"')
   logging.info(my_data)
   for b in brokers:
@@ -72,9 +72,10 @@ def on_disconnect(client, userdata, rc):
         logging.info("Connected.")
 
 if __name__ == '__main__':
+  myhostname=platform.node()
   for b in brokers:
     logging.info(f"Connecting Broker: {b} {brokers[b]}")
-    client[b]=mqtt.Client(f"{platform.node()}-ruuviclient")
+    client[b]=mqtt.Client(f"{myhostname}-ruuviclient")
     client[b].on_connect = on_connect
     client[b].on_disconnect = on_disconnect
     client[b].connect(b, brokers[b]['port'])
