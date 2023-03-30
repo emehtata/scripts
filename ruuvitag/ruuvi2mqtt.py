@@ -16,11 +16,10 @@ logging.basicConfig(
     level=logging.WARNING,
     datefmt='%Y-%m-%d %H:%M:%S')
 
-client = {}
+clients = {}
 
 brokers = {
-    "192.168.7.8":  { "port": 1883 },
-    "192.168.7.79": { "port": 1883 }
+    "192.168.7.8":  { "port": 11883 }
 }
 
 ruuvis = {
@@ -37,7 +36,7 @@ ruuvis = {
 
 def send_single(jdata, keyname, client):
   topic=jdata['room']+f"/{keyname}"
-  logging.info(f"{topic}: {jdata[keyname]}")
+  logging.debug(f"{topic}: {jdata[keyname]}")
   client.publish(topic, jdata[keyname])
 
 def handle_data(found_data):
@@ -51,9 +50,9 @@ def handle_data(found_data):
   my_data=json.dumps(jdata).replace("'", '"')
   logging.info(my_data)
   for b in brokers:
-    client[b].publish(topic, my_data)
+    clients[b].publish(topic, my_data)
     for j in jdata:
-      send_single(jdata, j, client[b])
+      send_single(jdata, j, clients[b])
   logging.info("-"*40)
 
 def on_connect(client, userdata, flags, rc):
@@ -65,21 +64,22 @@ def on_connect(client, userdata, flags, rc):
 
 def on_disconnect(client, userdata, rc):
     if rc != 0:
-        logging.error("Unexpected MQTT disconnection. Will reconnect.")
-        client.disconnect()
-        time.sleep(10)
-        client.connect(broker_address, port=broker_port)
-        logging.info("Connected.")
+        logging.error("Unexpected MQTT disconnection. Will reconnect all clients.")
+        for b in brokers:
+            clients[b].disconnect()
+            time.sleep(10)
+        for b in brokers:
+            clients[b].connect(b, port=brokers[b]['port'])
 
 if __name__ == '__main__':
   myhostname=platform.node()
   for b in brokers:
     logging.info(f"Connecting Broker: {b} {brokers[b]}")
-    client[b]=mqtt.Client(f"{myhostname}-ruuviclient")
-    client[b].on_connect = on_connect
-    client[b].on_disconnect = on_disconnect
-    client[b].connect(b, brokers[b]['port'])
-    logging.info(f"Connection OK {client[b]}  {brokers[b]}")
+    clients[b]=mqtt.Client(f"{myhostname}-ruuviclient")
+    clients[b].on_connect = on_connect
+    clients[b].on_disconnect = on_disconnect
+    clients[b].connect(b, port=brokers[b]['port'])
+    logging.info(f"Connection OK {clients[b]}  {brokers[b]}")
   try:
     RuuviTagSensor.get_data(handle_data)
   except Exception as e:
