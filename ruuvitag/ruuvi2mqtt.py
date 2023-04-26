@@ -15,14 +15,16 @@ from settings import ruuvis
 
 logging.basicConfig(
     format='%(asctime)s %(levelname)-8s %(message)s',
-    level=logging.INFO,
+    level=logging.WARNING,
     datefmt='%Y-%m-%d %H:%M:%S')
 
 clients = {}
 
+send_single_values = False
+
 def send_single(jdata, keyname, client):
   topic=jdata['room']+f"/{keyname}"
-  logging.debug(f"{topic}: {jdata[keyname]}")
+  logging.info(f"{topic}: {jdata[keyname]}")
   client.publish(topic, jdata[keyname])
 
 def handle_data(found_data):
@@ -37,8 +39,9 @@ def handle_data(found_data):
   logging.info(my_data)
   for b in brokers:
     clients[b].publish(topic, my_data)
-    for j in jdata:
-      send_single(jdata, j, clients[b])
+    if send_single_values:
+      for j in jdata:
+        send_single(jdata, j, clients[b])
   logging.info("-"*40)
 
 def on_connect(client, userdata, flags, rc):
@@ -59,6 +62,8 @@ def on_disconnect(client, userdata, rc):
 
 if __name__ == '__main__':
   myhostname=platform.node()
+  if len(sys.argv) > 1 and sys.argv[1] == '-s':
+    send_single_values = True
   for b in brokers:
     logging.info(f"Connecting Broker: {b} {brokers[b]}")
     clients[b]=mqtt.Client(f"{myhostname}-ruuviclient")
