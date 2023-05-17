@@ -18,6 +18,8 @@ logging.basicConfig(
     level=logging.WARNING,
     datefmt='%Y-%m-%d %H:%M:%S')
 
+found_ruuvis = []
+
 clients = {}
 
 send_single_values = False
@@ -29,7 +31,13 @@ def send_single(jdata, keyname, client):
 
 def handle_data(found_data):
   logging.info(found_data)
-  room=ruuvis[found_data[0]]
+  try:
+    room=ruuvis[found_data[0]]
+  except Exception as e:
+    room=found_data[0].replace(':','')
+    if not room in found_ruuvis:
+      logging.warning(f"Not found {found_data[0]}. Using topic home/{room}")
+      found_ruuvis.append(room)
   topic="home/"+room
   logging.debug(room)
   jdata=found_data[1]
