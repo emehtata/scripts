@@ -1,5 +1,5 @@
 brokers = {
-    "localhost":  { "port": 1883 }
+    "192.168.7.8":  { "port": 11883 }
 }
 
 ruuvis = {
