@@ -11,5 +11,7 @@ ruuvis = {
   "D5:43:48:93:FE:F0": "fridge",
   "C5:7D:4C:65:9D:60": "car-interior",
   "E2:9D:53:95:0E:8B": "upstairs-small-bedroom",
-  "D1:48:D2:7D:3D:02": "downstairs-bedroom"
+  "D1:48:D2:7D:3D:02": "downstairs-bedroom",
+  "E8:0D:4B:5D:BD:D8": "ruuvi1",
+  "DD:17:F3:D7:86:CE": "ruuvi2"
 }
