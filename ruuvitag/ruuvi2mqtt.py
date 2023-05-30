@@ -61,12 +61,7 @@ def on_connect(client, userdata, flags, rc):
 
 def on_disconnect(client, userdata, rc):
     if rc != 0:
-        logging.error("Unexpected MQTT disconnection. Will reconnect all clients.")
-        for b in brokers:
-            clients[b].disconnect()
-            time.sleep(10)
-        for b in brokers:
-            clients[b].connect(b, port=brokers[b]['port'])
+        logging.error("Unexpected MQTT disconnection.")
 
 if __name__ == '__main__':
   myhostname=platform.node()
