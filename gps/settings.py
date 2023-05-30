@@ -1,4 +1,5 @@
 # Constants
+SPEED_THRESHOLD = 3 # km/h
 DEGREE_THRESHOLD = 30  # Minimum bearing change (degrees)
 TIME_THRESHOLD = 30  # Minimum time threshold (seconds)
 
