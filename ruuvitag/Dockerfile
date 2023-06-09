@@ -1,12 +1,25 @@
-FROM python:buster
+# Use the official Python base image
+FROM python:3
 
-WORKDIR /usr/src/app
+# Install Bluetooth-related packages
+RUN apt-get update && \
+    apt-get install -y bluez && \
+    apt-get clean
 
-COPY . .
+RUN apt-get install bluez-hcidump && apt-get clean
 
-# RUN apt update && apt upgrade -y
+# Set the working directory in the container
+WORKDIR /app
 
-RUN pip3 install paho-mqtt
-RUN pip3 install ruuvitag-sensor
+# Copy the Python dependencies file
+COPY requirements.txt .
 
-ENTRYPOINT [ "python3", "ruuvi2mqtt.py" ]
+# Install the Python dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy the Python script and settings file to the container
+COPY ruuvi2mqtt.py .
+COPY settings.py .
+
+# Run the Python script as the default command
+CMD ["python3", "ruuvi2mqtt.py"]
