@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Supervisor Control</title>
+</head>
+<body>
+    <h1>Supervisor Control</h1>
+    <p>Supervisor Status: {% if supervisor_status %}Running{% else %}Not Running{% endif %}</p>
+    <form action="/start_supervisor" method="get">
+        <button type="submit">Start Supervisor</button>
+    </form>
+    <form action="/stop_supervisor" method="get">
+        <button type="submit">Stop Supervisor</button>
+    </form>
+    <form action="/restart_supervisor" method="get">
+        <button type="submit">Restart Supervisor</button>
+    </form>
+</body>
+</html>
