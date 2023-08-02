@@ -1,5 +1,5 @@
 # Use the official Python base image
-FROM python:3
+FROM python:buster
 
 # Install Bluetooth-related packages
 RUN apt-get update && \
